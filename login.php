@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "password" => $password
         ];
 
-        $ch = curl_init("https://api.radius-create.com/user/login");
+        $ch = curl_init("https://radius-backend-0qv8.onrender.com/user/login");
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
