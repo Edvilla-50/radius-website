@@ -41,9 +41,8 @@
 <body>
 <div class="container">
     <h1>Radius</h1>
-    <p>Upload your personal profile page here!.</p>
+    <p>Upload your personal profile page here! With HTML!.</p>
     <a href="login.php">Login</a>
-    <a href="register.php">Sign Up</a>
 </div>
 </body>
 </html>
