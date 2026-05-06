@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['userId'] = $json['userId'];
             $_SESSION['name'] = $json['name'];
 
-            header("Location: dashboard.php");
+            header("Location: edit.php");
             exit;
         } else {
             $error = "Invalid email or password";
