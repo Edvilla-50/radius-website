@@ -66,7 +66,7 @@ We do not share your personal information with advertisers.</p>
 <h2>8. Contact Us</h2>
 <p>If you have questions, contact:<br>
 <strong>Developer:</strong> Eddie<br>
-<strong>Email:</strong> your-email-here<br>
+<strong>Email:</strong> eavillalobos2@miners.utep.edu<br>
 <strong>App:</strong> Radius</p>
 
 </body>
