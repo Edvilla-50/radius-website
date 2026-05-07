@@ -48,7 +48,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
             <button id="templateMinimal" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Minimal</button>
             <button id="templateDark" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Dark</button>
             <button id="templateGamer" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Gamer</button>
-            <a href="https://www.youtube.com/watch?v=UB1O30fR-EE" 
+            <a href="https://youtu.be/w6TYxcs5Qdo?si=rM8UvxIeybZT2U1F" 
             target="_blank"
             class="px-3 py-1 bg-blue-600 rounded hover:bg-blue-500 text-sm font-semibold">
             Learn HTML
