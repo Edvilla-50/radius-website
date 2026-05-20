@@ -1,3 +1,4 @@
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <?php
 // Radius Privacy Policy Page
 ?>

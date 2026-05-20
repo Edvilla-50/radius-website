@@ -1,3 +1,4 @@
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <?php /* index.php */ ?>
 <!DOCTYPE html>
 <html lang="en">

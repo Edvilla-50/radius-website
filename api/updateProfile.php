@@ -1,3 +1,4 @@
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <?php
 $data = json_decode(file_get_contents('php://input'), true);
 
