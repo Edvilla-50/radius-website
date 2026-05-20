@@ -1,4 +1,3 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <?php
 session_start();
 
@@ -46,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <html lang="en">
 <head>
 <meta charset="UTF-8">
