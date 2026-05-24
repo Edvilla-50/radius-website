@@ -5,7 +5,7 @@
  * Called by the "Upload Image" button in dashboard.php / edit.php.
  */
 session_start();
-
+header('Content-Type: application/json');
 if (!isset($_SESSION['userId'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Not logged in']);
@@ -55,7 +55,8 @@ $ext    = $extMap[$mime];
 // publicly accessible at: /uploads/photos/{userId}/{random}.{ext}
 $uploadDir = __DIR__ . '/../uploads/photos/' . $userId;
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+    echo json_encode(['error' => 'Could not create directory: ' . $uploadDir]);
+    exit;
 }
 
 $filename = bin2hex(random_bytes(8)) . '.' . $ext; // e.g. a3f2b1c0d4e5f6a7.jpg
