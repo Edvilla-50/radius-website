@@ -54,11 +54,13 @@ $ext    = $extMap[$mime];
 // files land at: /uploads/photos/{userId}/{random}.{ext}
 // publicly accessible at: /uploads/photos/{userId}/{random}.{ext}
 $uploadDir = '/var/www/html/uploads/photos/' . $userId;
+$uploadDir = '/var/www/html/uploads/photos/' . $userId;
 if (!is_dir($uploadDir)) {
-    echo json_encode(['error' => 'Could not create directory: ' . $uploadDir]);
-    exit;
+    if (!mkdir($uploadDir, 0777, true)) {
+        echo json_encode(['error' => 'mkdir failed, is_writable: ' . (is_writable('/var/www/html/uploads/photos') ? 'yes' : 'no')]);
+        exit;
+    }
 }
-
 $filename = bin2hex(random_bytes(8)) . '.' . $ext; // e.g. a3f2b1c0d4e5f6a7.jpg
 $savePath = $uploadDir . '/' . $filename;
 
