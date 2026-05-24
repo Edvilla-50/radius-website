@@ -70,7 +70,7 @@ if (!move_uploaded_file($file['tmp_name'], $savePath)) {
     exit;
 }
 
-$publicUrl = '/uploads/photos/' . $userId . '/' . $filename;
+$publicUrl = 'https://www.radius-create.com/uploads/photos/' . $userId . '/' . $filename;
 
 header('Content-Type: application/json');
 echo json_encode(['url' => $publicUrl]);
