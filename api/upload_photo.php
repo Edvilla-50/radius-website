@@ -53,7 +53,7 @@ $ext    = $extMap[$mime];
 // ── build save path ──
 // files land at: /uploads/photos/{userId}/{random}.{ext}
 // publicly accessible at: /uploads/photos/{userId}/{random}.{ext}
-$uploadDir = __DIR__ . '/../uploads/photos/' . $userId;
+$uploadDir = '/var/www/html/uploads/photos/' . $userId;
 if (!is_dir($uploadDir)) {
     echo json_encode(['error' => 'Could not create directory: ' . $uploadDir]);
     exit;
