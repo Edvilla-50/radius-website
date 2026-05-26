@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Radius</title>
 <style>
     body {
@@ -22,21 +23,32 @@
         background: rgba(0,0,0,0.45);
         padding: 40px;
         border-radius: 12px;
+        backdrop-filter: blur(5px); /* Adds a nice frosted effect to match the dark theme */
+        max-width: 90%;
     }
     h1 { font-size: 3rem; margin-bottom: 10px; }
     p { font-size: 1.2rem; margin-bottom: 30px; }
+    
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
     a {
         display: inline-block;
         padding: 12px 24px;
-        margin: 8px;
         border-radius: 6px;
         text-decoration: none;
         font-weight: bold;
         background: #ff8c42;
         color: black;
         transition: 0.2s;
+        text-shadow: none; /* Keeps text legible on the bright button */
     }
-    a:hover { background: #ffa866; }
+    a:hover { background: #ffa866; transform: translateY(-1px); }
+    
     a.secondary {
         background: rgba(255,255,255,0.15);
         color: white;
@@ -48,10 +60,14 @@
 <body>
 <div class="container">
     <h1>Radius</h1>
-    <p>Upload your personal profile page here! With HTML!.</p>
-    <a href="login.php">Login</a>
-    <a href="opt-in.php">SMS Opt-In</a>
-    <a href="privacy-policy.php" class="secondary">Privacy Policy</a>
+    <p>Upload your personal profile page here! With HTML!</p>
+    
+    <div class="button-group">
+        <a href="login.php">Login</a>
+        <a href="opt-in.php">SMS Opt-In</a>
+        <a href="terms_and_conditions.php" class="secondary">Terms</a>
+        <a href="privacy-policy.php" class="secondary">Privacy</a>
+    </div>
 </div>
 </body>
 </html>
