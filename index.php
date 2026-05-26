@@ -50,7 +50,7 @@
     <h1>Radius</h1>
     <p>Upload your personal profile page here! With HTML!.</p>
     <a href="login.php">Login</a>
-    <a href="sms-opt-in.php">SMS Opt-In</a>
+    <a href="opt-in.php">SMS Opt-In</a>
     <a href="privacy-policy.php" class="secondary">Privacy Policy</a>
 </div>
 </body>
