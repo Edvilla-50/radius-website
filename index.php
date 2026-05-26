@@ -37,6 +37,12 @@
         transition: 0.2s;
     }
     a:hover { background: #ffa866; }
+    a.secondary {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.4);
+    }
+    a.secondary:hover { background: rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
@@ -44,6 +50,8 @@
     <h1>Radius</h1>
     <p>Upload your personal profile page here! With HTML!.</p>
     <a href="login.php">Login</a>
+    <a href="sms-opt-in.php">SMS Opt-In</a>
+    <a href="privacy-policy.php" class="secondary">Privacy Policy</a>
 </div>
 </body>
 </html>
