@@ -65,7 +65,7 @@
     <div class="button-group">
         <a href="login.php">Login</a>
         <a href="opt-in.php">SMS Opt-In</a>
-        <a href="terms-and-conditions.php" class="secondary">Terms</a>
+        <a href="-and-conditions.php" class="secondary">Terms</a>
         <a href="privacy-policy.php" class="secondary">Privacy</a>
     </div>
 </div>
