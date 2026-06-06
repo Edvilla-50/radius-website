@@ -339,8 +339,12 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     });
 
     // Load first track on startup (no autoplay until user clicks)
-    loadTrack(currentIndex);
-    playTrack(); // Start playing immediately
+   loadTrack(currentIndex);
+
+    document.addEventListener("click", function startOnInteraction() {
+        playTrack();
+        document.removeEventListener("click", startOnInteraction);
+    }, { once: true });
 </script>
 
 <script src="js/editor.js"></script>
