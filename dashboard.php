@@ -240,10 +240,10 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     // ── MUSIC PLAYER ─────────────────────────────────────────────
     // 🎵 Replace src values with your actual audio file paths
     const tracks = [
-        { name: "Are You Happy Now?",  src: "ES_Are You Happy Now? - The Big Let Down.mp3" },
-        { name: "Girlfriend",          src: "ES_Girlfriend (Instrumental Version) - Martin Landh.mp3" },
-        { name: "Parrot Prince",       src: "ES_Parrot Prince - Ryan James Carr.mp3" },
-        { name: "Poolside",            src: "ES_Poolside (Instrumental Version) - Maybe.mp3" },
+    { name: "Are You Happy Now?",  src: "are-you-happy-now.mp3" },
+    { name: "Girlfriend",          src: "girlfriend.mp3" },
+    { name: "Parrot Prince",       src: "parrot-prince.mp3" },
+    { name: "Poolside",            src: "poolside.mp3" },
     ];
 
     let currentIndex = 0;
@@ -340,6 +340,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     // Load first track on startup (no autoplay until user clicks)
     loadTrack(currentIndex);
+    playTrack(); // Start playing immediately
 </script>
 
 <script src="js/editor.js"></script>
