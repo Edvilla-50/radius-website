@@ -250,7 +250,7 @@
     <p class="footer-note">
         For full details on how we handle your data, read our
         <a href="privacy-policy.php">Privacy Policy</a>.<br>
-        Questions? Contact us at <a href="mailto:eavillalobos2@miners.utep.edu">eavillalobos2@miners.utep.edu</a>
+        Questions? Contact us at <a href="mailto:support@radius-create.com">support@radius-create.com</a>
     </p>
 
 </div>

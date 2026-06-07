@@ -257,7 +257,7 @@
             </div>
             <div class="contact-row">
                 <span class="contact-label">Email</span>
-                <span class="contact-value"><a href="mailto:eavillalobos2@miners.utep.edu">eavillalobos2@miners.utep.edu</a></span>
+                <span class="contact-value"><a href="mailto:support@radius-create.com">support@radius-create.com</a></span>
             </div>
             <div class="contact-row">
                 <span class="contact-label">App</span>
