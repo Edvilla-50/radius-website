@@ -4,7 +4,7 @@ if (!isset($_SESSION['userId'])) {
     header("Location: login.php");
     exit;
 }
-$userId = $_GET['id'] ?? $_SESSION['userId'];
+$userId = $_SESSION['userId'];
 $backend = "https://radius-backend-0qv8.onrender.com";
 $ch = curl_init("$backend/user/$userId/profile-html");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -175,7 +175,6 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     </div>
 </div>
 
-
 <div id="music-player">
     <button id="collapseBtn" title="Minimize"
             style="position:absolute;top:8px;right:8px;width:20px;height:20px;font-size:11px;color:#475569;">
@@ -199,14 +198,12 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
         </svg>
     </button>
 
-    <!-- Next -->
     <button id="nextBtn" title="Next">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M6 18l8.5-6L6 6v12zm2.5-6l5.5 4V8l-5.5 4zM16 6h2v12h-2z"/>
         </svg>
     </button>
 
-    <!-- Track info + progress -->
     <div class="track-info">
         <div class="track-name" id="trackName">Track 1</div>
         <div class="track-counter" id="trackCounter">1 / 4 · looping</div>
@@ -215,7 +212,6 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
         </div>
     </div>
 
-    <!-- Volume -->
     <div class="volume-wrapper">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="color:#64748b;flex-shrink:0">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
@@ -224,7 +220,6 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     </div>
 </div>
 
-<!-- ── Music Player (collapsed) ── -->
 <div id="player-collapsed" title="Open player">
     <div class="pulse-ring" id="pulseRing" style="display:none"></div>
     <svg viewBox="0 0 24 24" width="22" height="22" fill="#4ade80">
@@ -237,13 +232,11 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 <script>
     const USER_ID = <?= (int)$userId ?>;
 
-    // ── MUSIC PLAYER ─────────────────────────────────────────────
-    // 🎵 Replace src values with your actual audio file paths
     const tracks = [
-    { name: "Are You Happy Now?",  src: "are-you-happy-now.mp3" },
-    { name: "Girlfriend",          src: "girlfriend.mp3" },
-    { name: "Parrot Prince",       src: "parrot-prince.mp3" },
-    { name: "Poolside",            src: "poolside.mp3" },
+        { name: "Are You Happy Now?", src: "are-you-happy-now.mp3" },
+        { name: "Girlfriend",         src: "girlfriend.mp3" },
+        { name: "Parrot Prince",      src: "parrot-prince.mp3" },
+        { name: "Poolside",           src: "poolside.mp3" },
     ];
 
     let currentIndex = 0;
@@ -292,14 +285,14 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     }
 
     function goNext() {
-        currentIndex = (currentIndex + 1) % tracks.length; // wraps 4 → 0
+        currentIndex = (currentIndex + 1) % tracks.length;
         loadTrack(currentIndex);
         if (isPlaying) playTrack();
     }
 
     function goPrev() {
         if (audio.currentTime > 3) {
-            audio.currentTime = 0; // restart current track if past 3 s
+            audio.currentTime = 0;
         } else {
             currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
             loadTrack(currentIndex);
@@ -307,16 +300,13 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
         }
     }
 
-    // Auto-advance and loop when a track ends
     audio.addEventListener("ended", () => { goNext(); playTrack(); });
 
-    // Progress bar
     audio.addEventListener("timeupdate", () => {
         if (audio.duration)
             progressFill.style.width = (audio.currentTime / audio.duration * 100) + "%";
     });
 
-    // Seek on click
     progressBar.addEventListener("click", (e) => {
         if (!audio.duration) return;
         const rect = progressBar.getBoundingClientRect();
@@ -328,7 +318,6 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     prevBtn.addEventListener("click", goPrev);
     nextBtn.addEventListener("click", () => { goNext(); if (isPlaying) playTrack(); });
 
-    // Collapse / expand
     collapseBtn.addEventListener("click", () => {
         playerFull.style.display = "none";
         playerMini.style.display = "flex";
@@ -338,8 +327,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
         playerFull.style.display = "flex";
     });
 
-    // Load first track on startup (no autoplay until user clicks)
-   loadTrack(currentIndex);
+    loadTrack(currentIndex);
 
     document.addEventListener("click", function startOnInteraction() {
         playTrack();
