@@ -182,7 +182,7 @@
     <a href="index.php" class="back-btn">Back to Radius</a>
     <div class="hero-tag">Legal</div>
     <h1>Terms of <span>Service</span></h1>
-    <p class="hero-meta">Last updated &nbsp;·&nbsp; May 2026</p>
+    <p class="hero-meta">Last updated &nbsp;·&nbsp; June 2026</p>
 </div>
 
 <div class="content">
@@ -191,6 +191,12 @@
         <div class="section-number">Agreement</div>
         <h2>Accepting the terms</h2>
         <p>By accessing or using Radius, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you may not access the service.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-number">00</div>
+        <h2>Age Requirement</h2>
+        <p>You must be at least 18 years old to use Radius. By creating an account you confirm that you are 18 years of age or older. Radius reserves the right to terminate any account found to belong to a minor.</p>
     </div>
 
     <div class="section">
@@ -205,10 +211,25 @@
 
         <h3>1.3 Content Accuracy</h3>
         <p>You represent that any information you provide through the app is accurate, complete, and current at all times.</p>
+
+        <h3>1.4 User Conduct</h3>
+        <p>You agree not to use Radius to harass, threaten, stalk, intimidate, or harm other users in any way. Hate speech, sexual harassment, violence, and illegal activity are strictly prohibited. Violations will result in immediate account termination and may be reported to law enforcement.</p>
+
+        <h3>1.5 Meetup Safety</h3>
+        <p>Radius facilitates connections between users but is not responsible for what occurs during in-person meetups. Users choose to meet others entirely at their own risk. Radius strongly encourages users to meet in public places, use the in-app emergency system, and inform a trusted person before meeting someone new.</p>
+
+        <h3>1.6 Meetup Disclaimer</h3>
+        <p>Any meetup arrangements made through the app are solely between the users involved. Radius is not a party to any in-person interaction and bears no responsibility for the actions or conduct of its users outside the app.</p>
     </div>
 
     <div class="section">
         <div class="section-number">02</div>
+        <h2>Reporting & Moderation</h2>
+        <p>Users may report inappropriate behavior through the in-app reporting system. Radius will review reports and take action at its sole discretion, including but not limited to account suspension or permanent termination. Radius is not obligated to monitor all user activity but will act on reports made in good faith.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-number">03</div>
         <h2>Intellectual Property</h2>
         <p>The app and its original content, features, and functionality are and will remain the exclusive property of Eddie and Radius. Our trademarks and trade dress may not be used in connection with any product or service without prior written consent.</p>
         <div class="highlight-box">
@@ -217,37 +238,43 @@
     </div>
 
     <div class="section">
-        <div class="section-number">03</div>
+        <div class="section-number">04</div>
         <h2>Termination</h2>
         <p>We may terminate or suspend your account and bar access to the service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever, including without limitation a breach of the Terms.</p>
     </div>
 
     <div class="section">
-        <div class="section-number">04</div>
+        <div class="section-number">05</div>
         <h2>Limitation of Liability</h2>
-        <p>In no event shall Radius, nor its developer Eddie, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.</p>
+        <p>In no event shall Radius, nor its developer Eddie, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses resulting from your use of the service or any in-person interactions facilitated through the app.</p>
     </div>
 
     <div class="section">
-        <div class="section-number">05</div>
+        <div class="section-number">06</div>
+        <h2>Section 230 Notice</h2>
+        <p>Radius is an interactive computer service as defined under 47 U.S.C. § 230. Radius is not the publisher or speaker of any user-generated content and is not liable for content posted or actions taken by users of the platform.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-number">07</div>
         <h2>"As Is" Disclaimer</h2>
         <p>Your use of the service is at your sole risk. The service is provided on an "AS IS" and "AS AVAILABLE" basis. The service is provided without warranties of any kind, whether express or implied.</p>
     </div>
 
     <div class="section">
-        <div class="section-number">06</div>
+        <div class="section-number">08</div>
         <h2>Governing Law</h2>
         <p>These Terms shall be governed and construed in accordance with the laws of the United States, without regard to its conflict of law provisions.</p>
     </div>
 
     <div class="section">
-        <div class="section-number">07</div>
+        <div class="section-number">09</div>
         <h2>Updates to Terms</h2>
         <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. By continuing to access our service after those revisions become effective, you agree to be bound by the revised terms.</p>
     </div>
 
     <div class="section">
-        <div class="section-number">08</div>
+        <div class="section-number">10</div>
         <h2>Contact & Support</h2>
         <p style="margin-bottom: 20px;">Questions regarding these terms? Feel free to reach out.</p>
         <div class="contact-card">
