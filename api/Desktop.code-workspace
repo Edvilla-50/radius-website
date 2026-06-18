@@ -7,5 +7,7 @@
 			"path": "../../../../uploads"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.compile.nullAnalysis.mode": "disabled"
+	}
 }
