@@ -240,7 +240,7 @@
     <div class="section">
         <div class="section-number">06</div>
         <h2>Children's Privacy</h2>
-        <p>Radius is not intended for users under 13. We do not knowingly collect information from children.</p>
+        <p>Radius is not intended for users under 18.</p>
     </div>
 
     <div class="section">
