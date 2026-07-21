@@ -1,4 +1,4 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <?php
 $userId = $_GET['id'] ?? null;
 if (!$userId) {

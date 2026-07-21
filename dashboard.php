@@ -20,7 +20,7 @@ $data = json_decode($response, true);
 $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>";
 ?>
 <!DOCTYPE html>
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <html lang="en">
 <head>
     <meta charset="UTF-8">

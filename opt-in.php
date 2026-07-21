@@ -1,4 +1,4 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <?php // sms-opt-in.php ?>
 <!DOCTYPE html>
 <html lang="en">
