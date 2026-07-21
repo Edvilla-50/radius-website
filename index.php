@@ -1,5 +1,3 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
-<link rel="icon" type="image/png" href="your-logo.png">
 <?php /* index.php */ ?>
 <!DOCTYPE html>
 <html lang="en">
