@@ -1,4 +1,5 @@
 <link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/png" href="your-logo.png">
 <?php /* index.php */ ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -6,6 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Radius</title>
+<link rel="icon" type="image/png" href="logo.png">
 <style>
 body {
 margin: 0;
