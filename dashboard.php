@@ -20,7 +20,7 @@ $data = json_decode($response, true);
 $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>";
 ?>
 <!DOCTYPE html>
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,6 +29,9 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+
+    <!-- MusicKit on the Web — for the "Add Recently Played" builder feature -->
+    <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" async></script>
 
     <style>
         /* ── Music Player ── */
@@ -123,6 +126,9 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
             <button id="uploadImgBtn" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
                 📷 Upload Image
             </button>
+            <button id="musicBtn" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                🎵 Add Recently Played
+            </button>
             <button id="saveBtn" class="px-4 py-2 bg-green-500 rounded hover:bg-green-400 text-sm font-semibold">Save</button>
         </div>
     </div>
@@ -172,6 +178,43 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
                 Insert &lt;img&gt; at cursor
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Music Connect Modal -->
+<div id="musicModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div class="bg-gray-800 rounded-xl p-6 w-80 shadow-2xl space-y-3">
+        <div class="flex justify-between items-center">
+            <h2 class="text-sm font-semibold text-gray-200">Recently Played</h2>
+            <button id="musicModalClose" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+        </div>
+
+        <div id="musicStep1">
+            <p class="text-xs text-gray-400 mb-3">
+                Connect Apple Music so your latest track shows up on your profile automatically.
+            </p>
+            <button id="musicConnectBtn"
+                    class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40">
+                Connect Apple Music
+            </button>
+        </div>
+
+        <div id="musicStep2" class="hidden space-y-3">
+            <p class="text-xs text-gray-400">Connected. Here's your current track:</p>
+            <div class="flex items-center gap-3 bg-gray-900 rounded-lg p-3">
+                <img id="musicPreviewArt" src="" class="w-10 h-10 rounded object-cover bg-gray-700">
+                <div class="overflow-hidden">
+                    <div id="musicPreviewTrack" class="text-sm font-medium text-gray-200 truncate"></div>
+                    <div id="musicPreviewArtist" class="text-xs text-gray-500 truncate"></div>
+                </div>
+            </div>
+            <button id="musicInsertBtn"
+                    class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
+                Insert Recently Played widget at cursor
+            </button>
+        </div>
+
+        <p id="musicStatus" class="text-xs text-gray-400 hidden"></p>
     </div>
 </div>
 
@@ -333,6 +376,173 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
         playTrack();
         document.removeEventListener("click", startOnInteraction);
     }, { once: true });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     RADIUS: "Add Recently Played" feature (Apple Music via MusicKit JS)
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+    const BACKEND = "https://radius-backend-0qv8.onrender.com";
+    const musicBtn         = document.getElementById("musicBtn");
+    const musicModal       = document.getElementById("musicModal");
+    const musicModalClose  = document.getElementById("musicModalClose");
+    const musicStep1       = document.getElementById("musicStep1");
+    const musicStep2       = document.getElementById("musicStep2");
+    const musicConnectBtn  = document.getElementById("musicConnectBtn");
+    const musicInsertBtn   = document.getElementById("musicInsertBtn");
+    const musicStatus      = document.getElementById("musicStatus");
+
+    let musicKitInstance = null;
+    let currentSnippet = null;
+    let musicKitReady = typeof MusicKit !== "undefined";
+
+    // MusicKit on the Web loads asynchronously — the `MusicKit` global may
+    // not exist yet when this script runs. Listen for its ready event so
+    // we never touch it too early.
+    document.addEventListener("musickitloaded", () => { musicKitReady = true; });
+
+    function waitForMusicKit() {
+        if (musicKitReady) return Promise.resolve();
+        return new Promise((resolve) => {
+            document.addEventListener("musickitloaded", () => resolve(), { once: true });
+        });
+    }
+
+    musicBtn.addEventListener("click", () => {
+        musicModal.classList.remove("hidden");
+        checkExistingConnection();
+    });
+    musicModalClose.addEventListener("click", () => musicModal.classList.add("hidden"));
+
+    function setStatus(msg) {
+        musicStatus.textContent = msg;
+        musicStatus.classList.remove("hidden");
+    }
+
+    // If already connected, skip straight to showing the current track.
+    async function checkExistingConnection() {
+        try {
+            const res = await fetch(`${BACKEND}/api/music/${USER_ID}`);
+            if (res.ok) {
+                const body = await res.text();
+                if (body && body !== "null") {
+                    showPreview(JSON.parse(body));
+                    return;
+                }
+            }
+        } catch (e) { /* not connected yet, fall through */ }
+        musicStep1.classList.remove("hidden");
+        musicStep2.classList.add("hidden");
+    }
+
+    async function initMusicKit() {
+        if (musicKitInstance) return musicKitInstance;
+
+        await waitForMusicKit(); // don't touch the MusicKit global until it's ready
+
+        const tokenRes = await fetch(`${BACKEND}/api/music/dev-token`);
+        const { token } = await tokenRes.json();
+
+        await MusicKit.configure({
+            developerToken: token,
+            app: { name: "Radius", build: "1.0.0" }
+        });
+        musicKitInstance = MusicKit.getInstance();
+        return musicKitInstance;
+    }
+
+    musicConnectBtn.addEventListener("click", async () => {
+        musicConnectBtn.disabled = true;
+        setStatus("Connecting...");
+        try {
+            const music = await initMusicKit();
+            const userToken = await music.authorize(); // triggers Apple's sign-in popup
+
+            const res = await fetch(`${BACKEND}/api/music/connect/${USER_ID}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ appleMusicUserToken: userToken })
+            });
+
+            if (!res.ok) throw new Error("Backend connect failed");
+            const snippet = await res.json();
+            showPreview(snippet);
+            setStatus("");
+        } catch (err) {
+            console.error(err);
+            setStatus("Couldn't connect — try again.");
+        }
+        musicConnectBtn.disabled = false;
+    });
+
+    function showPreview(snippet) {
+        currentSnippet = snippet;
+        musicStep1.classList.add("hidden");
+        musicStep2.classList.remove("hidden");
+        document.getElementById("musicPreviewArt").src = snippet.albumArtUrl || "";
+        document.getElementById("musicPreviewTrack").textContent = snippet.trackName || "No recent tracks yet";
+        document.getElementById("musicPreviewArtist").textContent = snippet.artistName || "";
+    }
+
+    // Inserts a small self-contained widget into the profile HTML that
+    // fetches + displays the CURRENT track live, every time the saved
+    // profile page is loaded by anyone. IDs are namespaced with the user's
+    // ID so multiple widgets (or re-inserts) on the same page never collide.
+    musicInsertBtn.addEventListener("click", () => {
+        const uid = USER_ID;
+        const widgetHtml = `
+<!-- Radius: Recently Played (auto-updates) -->
+<div id="radius-recently-played-${uid}" data-user-id="${uid}"
+     style="display:flex;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:10px 14px;max-width:320px;font-family:sans-serif;">
+  <img id="rp-art-${uid}" src="" style="width:44px;height:44px;border-radius:6px;object-fit:cover;background:#2d2d4e;">
+  <div style="overflow:hidden;flex:1;">
+    <div id="rp-track-${uid}" style="color:#e2e8f0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</div>
+    <div id="rp-artist-${uid}" style="color:#94a3b8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+  </div>
+  <button id="rp-play-${uid}" style="background:#4ade80;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:none;">▶</button>
+</div>
+<audio id="rp-audio-${uid}"></audio>
+<script>
+(function() {
+  fetch("${BACKEND}/api/music/${uid}")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.trackName) return;
+      document.getElementById("rp-art-${uid}").src = data.albumArtUrl || "";
+      document.getElementById("rp-track-${uid}").textContent = data.trackName;
+      document.getElementById("rp-artist-${uid}").textContent = data.artistName || "";
+      if (data.previewUrl) {
+        var btn = document.getElementById("rp-play-${uid}");
+        var audio = document.getElementById("rp-audio-${uid}");
+        btn.style.display = "block";
+        var playing = false;
+        btn.onclick = function() {
+          if (playing) { audio.pause(); btn.textContent = "▶"; }
+          else { audio.src = data.previewUrl; audio.play(); btn.textContent = "❚❚"; }
+          playing = !playing;
+        };
+        audio.onended = function() { btn.textContent = "▶"; playing = false; };
+      }
+    })
+    .catch(function() {});
+})();
+<\/script>
+`.trim();
+
+        // Insert at cursor — mirrors the existing image-insert behavior.
+        const cm = document.querySelector(".CodeMirror") && document.querySelector(".CodeMirror").CodeMirror;
+        if (cm) {
+            cm.replaceSelection(widgetHtml);
+        } else {
+            const editor = document.getElementById("editor");
+            const pos = editor.selectionStart;
+            editor.value = editor.value.slice(0, pos) + widgetHtml + editor.value.slice(pos);
+        }
+
+        musicModal.classList.add("hidden");
+    });
+})();
 </script>
 
 <script src="js/editor.js"></script>
