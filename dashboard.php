@@ -210,6 +210,17 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         }
 
+        /* HTML editor sizing */
+        .CodeMirror {
+            height: calc(100vh - 80px) !important;
+            min-height: 700px;
+            font-size: 14px;
+        }
+
+        .CodeMirror-scroll {
+            min-height: 700px;
+        }
+
     </style>
 
 </head>
@@ -262,9 +273,9 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     <!-- Main content -->
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden min-h-0">
 
-        <div class="w-1/2 h-full border-r border-gray-700">
+        <div class="w-1/2 h-full border-r border-gray-700 overflow-hidden">
 
             <textarea id="editor"><?= htmlspecialchars($currentHtml) ?></textarea>
 
