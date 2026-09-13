@@ -570,7 +570,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         trackName.textContent    = track.name;
 
-        trackCounter.textContent = \`${index + 1} / ${tracks.length} · looping\`;
+        trackCounter.textContent = `${index + 1} / ${tracks.length} · looping`;
 
         progressFill.style.width = "0%";
 
@@ -722,7 +722,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     let musicKitReady = typeof MusicKit !== "undefined";
 
-    // MusicKit on the Web loads asynchronously — the \`MusicKit\` global may
+    // MusicKit on the Web loads asynchronously — the `MusicKit` global may
 
     // not exist yet when this script runs. Listen for its ready event so
 
@@ -766,7 +766,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         try {
 
-            const res = await fetch(\`${BACKEND}/api/music/${USER_ID}\`);
+            const res = await fetch(`${BACKEND}/api/music/${USER_ID}`);
 
             if (res.ok) {
 
@@ -796,7 +796,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         await waitForMusicKit(); // don't touch the MusicKit global until it's ready
 
-        const tokenRes = await fetch(\`${BACKEND}/api/music/dev-token\`);
+        const tokenRes = await fetch(`${BACKEND}/api/music/dev-token`);
 
         const { token } = await tokenRes.json();
 
@@ -826,7 +826,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
             const userToken = await music.authorize(); // triggers Apple's sign-in popup
 
-            const res = await fetch(\`${BACKEND}/api/music/connect/${USER_ID}\`, {
+            const res = await fetch(`${BACKEND}/api/music/connect/${USER_ID}`, {
 
                 method: "POST",
 
@@ -858,7 +858,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
             setStatus(
 
-                \`Auth failed: ${err?.name || "unknown"} — ${err?.message || "unknown error"}\`
+                `Auth failed: ${err?.name || "unknown"} — ${err?.message || "unknown error"}`
 
             );
 
@@ -896,7 +896,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         const uid = USER_ID;
 
-        const widgetHtml = \`
+        const widgetHtml = `
 
 <!-- Radius: Recently Played (auto-updates) -->
 
@@ -968,9 +968,9 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
 })();
 
-<\\/script>
+<\/script>
 
-\`.trim();
+`.trim();
 
         // Insert at cursor — mirrors the existing image-insert behavior.
 
