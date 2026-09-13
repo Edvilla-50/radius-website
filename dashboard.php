@@ -3,11 +3,8 @@
 session_start();
 
 if (!isset($_SESSION['userId'])) {
-
     header("Location: login.php");
-
     exit;
-
 }
 
 $userId = $_SESSION['userId'];
@@ -19,195 +16,214 @@ $ch = curl_init("$backend/user/$userId/profile-html");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 $response = curl_exec($ch);
-
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 curl_close($ch);
 
 if ($httpCode !== 200) {
-
     echo "<h1 style='color:red'>Backend error: $httpCode</h1>";
-
-    echo "<pre>$response</pre>";
-
+    echo "<pre>" . htmlspecialchars($response ?? '') . "</pre>";
     exit;
-
 }
 
 $data = json_decode($response, true);
 
-$currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>";
+$currentHtml = $data["html"] ??
+    "<html><body><h1>New Profile</h1></body></html>";
 
 ?>
 
 <!DOCTYPE html>
-
-<link rel="icon" type="image/jpeg" href="logo.jpg">
-
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+
     <title>Radius Profile Builder</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css"
+    >
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
 
-    <!-- MusicKit on the Web — for the "Add Recently Played" builder feature -->
-
-    <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" async></script>
+    <!-- MusicKit on the Web -->
+    <script
+        src="https://js-cdn.music.apple.com/musickit/v3/musickit.js"
+        async>
+    </script>
 
     <style>
 
         /* ── Music Player ── */
 
         #music-player {
-
             position: fixed;
-
             bottom: 24px;
-
             right: 24px;
-
             z-index: 1000;
-
             background: #1a1a2e;
-
             border: 1px solid #2d2d4e;
-
             border-radius: 16px;
-
             padding: 14px 18px;
-
             display: flex;
-
             align-items: center;
-
             gap: 12px;
-
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-
             min-width: 280px;
-
             transition: border-color 0.2s, box-shadow 0.2s;
-
         }
 
         #music-player:hover {
-
             border-color: #4ade80;
-
             box-shadow: 0 8px 32px rgba(74,222,128,0.15);
-
         }
 
-        #music-player .track-info { flex: 1; overflow: hidden; }
+        #music-player .track-info {
+            flex: 1;
+            overflow: hidden;
+        }
 
         #music-player .track-name {
-
-            font-size: 13px; font-weight: 600; color: #e2e8f0;
-
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        #music-player .track-counter { font-size: 11px; color: #64748b; margin-top: 2px; }
+        #music-player .track-counter {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
 
         #music-player .progress-bar {
-
-            width: 100%; height: 3px; background: #2d2d4e;
-
-            border-radius: 2px; margin-top: 6px; cursor: pointer; overflow: hidden;
-
+            width: 100%;
+            height: 3px;
+            background: #2d2d4e;
+            border-radius: 2px;
+            margin-top: 6px;
+            cursor: pointer;
+            overflow: hidden;
         }
 
         #music-player .progress-fill {
-
             height: 100%;
-
             background: linear-gradient(90deg, #4ade80, #22d3ee);
-
-            border-radius: 2px; width: 0%; transition: width 0.5s linear;
-
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.5s linear;
         }
 
         #music-player button {
-
-            background: none; border: none; cursor: pointer; padding: 4px;
-
-            display: flex; align-items: center; justify-content: center;
-
-            border-radius: 50%; transition: background 0.2s; color: #94a3b8;
-
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            color: #94a3b8;
         }
 
-        #music-player button:hover { background: rgba(74,222,128,0.15); color: #4ade80; }
+        #music-player button:hover {
+            background: rgba(74,222,128,0.15);
+            color: #4ade80;
+        }
 
         #music-player .play-btn {
-
-            width: 36px; height: 36px;
-
-            background: #4ade80 !important; color: #0f172a !important; border-radius: 50%;
-
+            width: 36px;
+            height: 36px;
+            background: #4ade80 !important;
+            color: #0f172a !important;
+            border-radius: 50%;
         }
 
-        #music-player .play-btn:hover { background: #22c55e !important; transform: scale(1.05); }
+        #music-player .play-btn:hover {
+            background: #22c55e !important;
+            transform: scale(1.05);
+        }
 
-        #music-player .volume-wrapper { display: flex; align-items: center; gap: 6px; }
+        #music-player .volume-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         #music-player input[type="range"] {
-
-            -webkit-appearance: none; width: 60px; height: 3px;
-
-            background: #2d2d4e; border-radius: 2px; outline: none; cursor: pointer;
-
+            -webkit-appearance: none;
+            width: 60px;
+            height: 3px;
+            background: #2d2d4e;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
         }
 
         #music-player input[type="range"]::-webkit-slider-thumb {
-
-            -webkit-appearance: none; width: 10px; height: 10px;
-
-            border-radius: 50%; background: #4ade80; cursor: pointer;
-
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            cursor: pointer;
         }
 
         #player-collapsed {
-
-            position: fixed; bottom: 24px; right: 24px; z-index: 1000;
-
-            background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 50%;
-
-            width: 48px; height: 48px; display: none; align-items: center;
-
-            justify-content: center; cursor: pointer;
-
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.2s ease;
-
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: #1a1a2e;
+            border: 1px solid #2d2d4e;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transition: all 0.2s ease;
         }
 
-        #player-collapsed:hover { border-color: #4ade80; transform: scale(1.1); }
+        #player-collapsed:hover {
+            border-color: #4ade80;
+            transform: scale(1.1);
+        }
 
         .pulse-ring {
-
-            position: absolute; width: 48px; height: 48px; border-radius: 50%;
-
-            border: 2px solid #4ade80; animation: pulse 2s ease-out infinite; opacity: 0;
-
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #4ade80;
+            animation: pulse 2s ease-out infinite;
+            opacity: 0;
         }
 
         @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
 
-            0%   { transform: scale(1);   opacity: 0.6; }
-
-            100% { transform: scale(1.6); opacity: 0;   }
-
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
         }
 
     </style>
@@ -222,43 +238,59 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     <div class="flex items-center justify-between px-6 py-4 bg-gray-800 shadow">
 
-        <h1 class="text-xl font-bold text-green-400">Radius Profile Builder</h1>
+        <h1 class="text-xl font-bold text-green-400">
+            Radius Profile Builder
+        </h1>
 
         <div class="flex gap-3">
 
-            <button id="templateMinimal" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Minimal</button>
+            <button
+                id="templateMinimal"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                Minimal
+            </button>
 
-            <button id="templateDark"    class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Dark</button>
+            <button
+                id="templateDark"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                Dark
+            </button>
 
-            <button id="templateGamer"   class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">Gamer</button>
+            <button
+                id="templateGamer"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                Gamer
+            </button>
 
-            <a href="https://youtu.be/w6TYxcs5Qdo?si=rM8UvxIeybZT2U1F"
-
-               target="_blank"
-
-               class="px-3 py-1 bg-blue-600 rounded hover:bg-blue-500 text-sm font-semibold">
-
+            <a
+                href="https://youtu.be/w6TYxcs5Qdo?si=rM8UvxIeybZT2U1F"
+                target="_blank"
+                class="px-3 py-1 bg-blue-600 rounded hover:bg-blue-500 text-sm font-semibold">
                 Learn HTML
-
             </a>
 
-            <button id="uploadImgBtn" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
-
+            <button
+                id="uploadImgBtn"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
                 📷 Upload Image
-
             </button>
 
-            <button id="musicBtn" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
-
+            <button
+                id="musicBtn"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
                 🎵 Add Recently Played
-
             </button>
 
-            <button id="saveBtn" class="px-4 py-2 bg-green-500 rounded hover:bg-green-400 text-sm font-semibold">Save</button>
+            <button
+                id="saveBtn"
+                class="px-4 py-2 bg-green-500 rounded hover:bg-green-400 text-sm font-semibold">
+                Save
+            </button>
 
         </div>
 
     </div>
+
 
     <!-- Main content -->
 
@@ -272,7 +304,10 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         <div class="w-1/2 h-full bg-white">
 
-            <iframe id="preview" class="w-full h-full border-0"></iframe>
+            <iframe
+                id="preview"
+                class="w-full h-full border-0">
+            </iframe>
 
         </div>
 
@@ -280,70 +315,101 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
 </div>
 
+
 <!-- Image Upload Modal -->
 
-<div id="uploadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+<div
+    id="uploadModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
 
     <div class="bg-gray-800 rounded-xl p-6 w-80 shadow-2xl space-y-3">
 
         <div class="flex justify-between items-center">
 
-            <h2 class="text-sm font-semibold text-gray-200">Upload Image</h2>
+            <h2 class="text-sm font-semibold text-gray-200">
+                Upload Image
+            </h2>
 
-            <button id="uploadModalClose" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+            <button
+                id="uploadModalClose"
+                class="text-gray-500 hover:text-white text-xl leading-none">
+                &times;
+            </button>
 
         </div>
 
-        <div id="uploadDrop"
-
-             class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-green-400 transition-colors">
+        <div
+            id="uploadDrop"
+            class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-green-400 transition-colors">
 
             <p class="text-sm text-gray-400">
 
-                <span class="text-green-400 font-medium">Click to choose</span> or drag &amp; drop
+                <span class="text-green-400 font-medium">
+                    Click to choose
+                </span>
+
+                or drag &amp; drop
 
             </p>
 
-            <p class="text-xs text-gray-600 mt-1">JPG · PNG · WEBP · GIF · max 5 MB</p>
+            <p class="text-xs text-gray-600 mt-1">
+                JPG · PNG · WEBP · GIF · max 5 MB
+            </p>
 
-            <input id="uploadFileInput" type="file" accept="image/*" class="hidden">
+            <input
+                id="uploadFileInput"
+                type="file"
+                accept="image/*"
+                class="hidden">
 
         </div>
 
-        <img id="uploadPreview" src="" alt="" class="hidden w-full max-h-36 object-contain rounded-lg bg-gray-700">
+        <img
+            id="uploadPreview"
+            src=""
+            alt=""
+            class="hidden w-full max-h-36 object-contain rounded-lg bg-gray-700">
 
-        <p id="uploadStatus" class="text-xs text-gray-400 hidden"></p>
+        <p
+            id="uploadStatus"
+            class="text-xs text-gray-400 hidden">
+        </p>
 
-        <button id="uploadSubmitBtn"
-
-                class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
-
-                disabled>
-
+        <button
+            id="uploadSubmitBtn"
+            class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled>
             Upload
-
         </button>
 
-        <div id="uploadResult" class="hidden space-y-2 pt-1 border-t border-gray-700">
+        <div
+            id="uploadResult"
+            class="hidden space-y-2 pt-1 border-t border-gray-700">
 
-            <p class="text-xs text-gray-400">Image URL:</p>
+            <p class="text-xs text-gray-400">
+                Image URL:
+            </p>
 
             <div class="flex gap-2">
 
-                <input id="uploadUrl" type="text" readonly
+                <input
+                    id="uploadUrl"
+                    type="text"
+                    readonly
+                    class="flex-1 bg-gray-900 text-green-400 text-xs px-3 py-2 rounded-lg border border-gray-700 outline-none">
 
-                       class="flex-1 bg-gray-900 text-green-400 text-xs px-3 py-2 rounded-lg border border-gray-700 outline-none">
-
-                <button id="uploadCopyBtn" class="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-xs rounded-lg transition">Copy</button>
+                <button
+                    id="uploadCopyBtn"
+                    class="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-xs rounded-lg transition">
+                    Copy
+                </button>
 
             </div>
 
-            <button id="uploadInsertBtn"
-
-                    class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
-
+            <button
+                id="uploadInsertBtn"
+                class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
                 Insert &lt;img&gt; at cursor
-
             </button>
 
         </div>
@@ -352,31 +418,39 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
 </div>
 
+
 <!-- Music Connect Modal -->
 
-<div id="musicModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+<div
+    id="musicModal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
 
     <div class="bg-gray-800 rounded-xl p-6 w-80 shadow-2xl space-y-3">
 
         <div class="flex justify-between items-center">
 
-            <h2 class="text-sm font-semibold text-gray-200">Recently Played</h2>
+            <h2 class="text-sm font-semibold text-gray-200">
+                Recently Played
+            </h2>
 
-            <button id="musicModalClose" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+            <button
+                id="musicModalClose"
+                class="text-gray-500 hover:text-white text-xl leading-none">
+                &times;
+            </button>
 
         </div>
+
 
         <div id="musicStep1">
 
             <p class="text-xs text-gray-400 mb-3">
-
                 Connect Apple Music so your latest track shows up on your profile automatically.
-
             </p>
 
-            <button id="musicConnectBtn"
-
-                    class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40">
+            <button
+                id="musicConnectBtn"
+                class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40">
 
                 Connect Apple Music
 
@@ -384,27 +458,42 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         </div>
 
-        <div id="musicStep2" class="hidden space-y-3">
 
-            <p class="text-xs text-gray-400">Connected. Here's your current track:</p>
+        <div
+            id="musicStep2"
+            class="hidden space-y-3">
+
+            <p class="text-xs text-gray-400">
+                Connected. Here's your current track:
+            </p>
 
             <div class="flex items-center gap-3 bg-gray-900 rounded-lg p-3">
 
-                <img id="musicPreviewArt" src="" class="w-10 h-10 rounded object-cover bg-gray-700">
+                <img
+                    id="musicPreviewArt"
+                    src=""
+                    class="w-10 h-10 rounded object-cover bg-gray-700"
+                    alt="">
 
                 <div class="overflow-hidden">
 
-                    <div id="musicPreviewTrack" class="text-sm font-medium text-gray-200 truncate"></div>
+                    <div
+                        id="musicPreviewTrack"
+                        class="text-sm font-medium text-gray-200 truncate">
+                    </div>
 
-                    <div id="musicPreviewArtist" class="text-xs text-gray-500 truncate"></div>
+                    <div
+                        id="musicPreviewArtist"
+                        class="text-xs text-gray-500 truncate">
+                    </div>
 
                 </div>
 
             </div>
 
-            <button id="musicInsertBtn"
-
-                    class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
+            <button
+                id="musicInsertBtn"
+                class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
 
                 Insert Recently Played widget at cursor
 
@@ -412,19 +501,33 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         </div>
 
-        <p id="musicStatus" class="text-xs text-gray-400 hidden"></p>
+
+        <p
+            id="musicStatus"
+            class="text-xs text-gray-400 hidden">
+        </p>
 
     </div>
 
 </div>
 
+
+<!-- Custom music player -->
+
 <div id="music-player">
 
-    <button id="collapseBtn" title="Minimize"
+    <button
+        id="collapseBtn"
+        title="Minimize"
+        style="position:absolute;top:8px;right:8px;width:20px;height:20px;font-size:11px;color:#475569;">
 
-            style="position:absolute;top:8px;right:8px;width:20px;height:20px;font-size:11px;color:#475569;">
-
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5">
 
             <path d="M19 15l-7 7-7-7"/>
 
@@ -432,9 +535,14 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     </button>
 
+
     <button id="prevBtn" title="Previous">
 
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="currentColor">
 
             <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
 
@@ -442,15 +550,30 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     </button>
 
-    <button id="playPauseBtn" class="play-btn" title="Play / Pause">
 
-        <svg id="playIcon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+    <button
+        id="playPauseBtn"
+        class="play-btn"
+        title="Play / Pause">
+
+        <svg
+            id="playIcon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="currentColor">
 
             <path d="M8 5v14l11-7z"/>
 
         </svg>
 
-        <svg id="pauseIcon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:none">
+        <svg
+            id="pauseIcon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="currentColor"
+            style="display:none">
 
             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
 
@@ -458,9 +581,14 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     </button>
 
+
     <button id="nextBtn" title="Next">
 
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="currentColor">
 
             <path d="M6 18l8.5-6L6 6v12zm2.5-6l5.5 4V8l-5.5 4zM16 6h2v12h-2z"/>
 
@@ -468,39 +596,76 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     </button>
 
+
     <div class="track-info">
 
-        <div class="track-name" id="trackName">Track 1</div>
+        <div
+            class="track-name"
+            id="trackName">
+            Track 1
+        </div>
 
-        <div class="track-counter" id="trackCounter">1 / 4 · looping</div>
+        <div
+            class="track-counter"
+            id="trackCounter">
+            1 / 4 · looping
+        </div>
 
-        <div class="progress-bar" id="progressBar">
+        <div
+            class="progress-bar"
+            id="progressBar">
 
-            <div class="progress-fill" id="progressFill"></div>
+            <div
+                class="progress-fill"
+                id="progressFill">
+            </div>
 
         </div>
 
     </div>
 
+
     <div class="volume-wrapper">
 
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="color:#64748b;flex-shrink:0">
+        <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            style="color:#64748b;flex-shrink:0">
 
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
 
         </svg>
 
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.7">
+        <input
+            type="range"
+            id="volumeSlider"
+            min="0"
+            max="1"
+            step="0.05"
+            value="0.7">
 
     </div>
 
 </div>
 
-<div id="player-collapsed" title="Open player">
 
-    <div class="pulse-ring" id="pulseRing" style="display:none"></div>
+<div
+    id="player-collapsed"
+    title="Open player">
 
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="#4ade80">
+    <div
+        class="pulse-ring"
+        id="pulseRing"
+        style="display:none">
+    </div>
+
+    <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="#4ade80">
 
         <path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/>
 
@@ -508,365 +673,723 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
 </div>
 
+
 <audio id="audioPlayer"></audio>
+
 
 <script>
 
-    const USER_ID = <?= (int)$userId ?>;
+const USER_ID = <?= (int)$userId ?>;
 
-    const tracks = [
-
-        { name: "Are You Happy Now?", src: "are-you-happy-now.mp3" },
-
-        { name: "Girlfriend",         src: "girlfriend.mp3" },
-
-        { name: "Parrot Prince",      src: "parrot-prince.mp3" },
-
-        { name: "Poolside",           src: "poolside.mp3" },
-
-    ];
-
-    let currentIndex = 0;
-
-    let isPlaying    = false;
-
-    const audio        = document.getElementById("audioPlayer");
-
-    const playPauseBtn = document.getElementById("playPauseBtn");
-
-    const playIcon     = document.getElementById("playIcon");
-
-    const pauseIcon    = document.getElementById("pauseIcon");
-
-    const trackName    = document.getElementById("trackName");
-
-    const trackCounter = document.getElementById("trackCounter");
-
-    const progressFill = document.getElementById("progressFill");
-
-    const progressBar  = document.getElementById("progressBar");
-
-    const volumeSlider = document.getElementById("volumeSlider");
-
-    const prevBtn      = document.getElementById("prevBtn");
-
-    const nextBtn      = document.getElementById("nextBtn");
-
-    const collapseBtn  = document.getElementById("collapseBtn");
-
-    const playerFull   = document.getElementById("music-player");
-
-    const playerMini   = document.getElementById("player-collapsed");
-
-    const pulseRing    = document.getElementById("pulseRing");
-
-    audio.volume = parseFloat(volumeSlider.value);
-
-    function loadTrack(index) {
-
-        const track = tracks[index];
-
-        audio.src = track.src;
-
-        trackName.textContent    = track.name;
-
-        trackCounter.textContent = `${index + 1} / ${tracks.length} · looping`;
-
-        progressFill.style.width = "0%";
-
+const tracks = [
+    {
+        name: "Are You Happy Now?",
+        src: "are-you-happy-now.mp3"
+    },
+    {
+        name: "Girlfriend",
+        src: "girlfriend.mp3"
+    },
+    {
+        name: "Parrot Prince",
+        src: "parrot-prince.mp3"
+    },
+    {
+        name: "Poolside",
+        src: "poolside.mp3"
     }
+];
 
-    function playTrack() {
+let currentIndex = 0;
+let isPlaying = false;
 
-        audio.play().catch(() => {});
+const audio = document.getElementById("audioPlayer");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const playIcon = document.getElementById("playIcon");
+const pauseIcon = document.getElementById("pauseIcon");
+const trackName = document.getElementById("trackName");
+const trackCounter = document.getElementById("trackCounter");
+const progressFill = document.getElementById("progressFill");
+const progressBar = document.getElementById("progressBar");
+const volumeSlider = document.getElementById("volumeSlider");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const collapseBtn = document.getElementById("collapseBtn");
+const playerFull = document.getElementById("music-player");
+const playerMini = document.getElementById("player-collapsed");
+const pulseRing = document.getElementById("pulseRing");
 
-        isPlaying = true;
+audio.volume = parseFloat(volumeSlider.value);
 
-        playIcon.style.display  = "none";
+function loadTrack(index) {
 
-        pauseIcon.style.display = "block";
+    const track = tracks[index];
 
-        pulseRing.style.display = "block";
+    audio.src = track.src;
 
-    }
+    trackName.textContent = track.name;
 
-    function pauseTrack() {
+    trackCounter.textContent =
+        `${index + 1} / ${tracks.length} · looping`;
 
-        audio.pause();
+    progressFill.style.width = "0%";
+}
 
-        isPlaying = false;
+function playTrack() {
 
-        playIcon.style.display  = "block";
+    audio.play().catch(() => {});
 
-        pauseIcon.style.display = "none";
+    isPlaying = true;
 
-        pulseRing.style.display = "none";
+    playIcon.style.display = "none";
+    pauseIcon.style.display = "block";
 
-    }
+    pulseRing.style.display = "block";
+}
 
-    function goNext() {
+function pauseTrack() {
 
-        currentIndex = (currentIndex + 1) % tracks.length;
+    audio.pause();
 
-        loadTrack(currentIndex);
+    isPlaying = false;
 
-        if (isPlaying) playTrack();
+    playIcon.style.display = "block";
+    pauseIcon.style.display = "none";
 
-    }
+    pulseRing.style.display = "none";
+}
 
-    function goPrev() {
+function goNext() {
 
-        if (audio.currentTime > 3) {
-
-            audio.currentTime = 0;
-
-        } else {
-
-            currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-
-            loadTrack(currentIndex);
-
-            if (isPlaying) playTrack();
-
-        }
-
-    }
-
-    audio.addEventListener("ended", () => { goNext(); playTrack(); });
-
-    audio.addEventListener("timeupdate", () => {
-
-        if (audio.duration)
-
-            progressFill.style.width = (audio.currentTime / audio.duration * 100) + "%";
-
-    });
-
-    progressBar.addEventListener("click", (e) => {
-
-        if (!audio.duration) return;
-
-        const rect = progressBar.getBoundingClientRect();
-
-        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-
-    });
-
-    volumeSlider.addEventListener("input", () => { audio.volume = parseFloat(volumeSlider.value); });
-
-    playPauseBtn.addEventListener("click", () => { isPlaying ? pauseTrack() : playTrack(); });
-
-    prevBtn.addEventListener("click", goPrev);
-
-    nextBtn.addEventListener("click", () => { goNext(); if (isPlaying) playTrack(); });
-
-    collapseBtn.addEventListener("click", () => {
-
-        playerFull.style.display = "none";
-
-        playerMini.style.display = "flex";
-
-    });
-
-    playerMini.addEventListener("click", () => {
-
-        playerMini.style.display = "none";
-
-        playerFull.style.display = "flex";
-
-    });
+    currentIndex =
+        (currentIndex + 1) % tracks.length;
 
     loadTrack(currentIndex);
 
-    document.addEventListener("click", function startOnInteraction() {
+    if (isPlaying) {
+        playTrack();
+    }
+}
+
+function goPrev() {
+
+    if (audio.currentTime > 3) {
+
+        audio.currentTime = 0;
+
+    } else {
+
+        currentIndex =
+            (currentIndex - 1 + tracks.length) %
+            tracks.length;
+
+        loadTrack(currentIndex);
+
+        if (isPlaying) {
+            playTrack();
+        }
+    }
+}
+
+audio.addEventListener("ended", function () {
+
+    currentIndex =
+        (currentIndex + 1) % tracks.length;
+
+    loadTrack(currentIndex);
+
+    if (isPlaying) {
+        playTrack();
+    }
+
+});
+
+audio.addEventListener("timeupdate", function () {
+
+    if (audio.duration) {
+
+        progressFill.style.width =
+            (audio.currentTime / audio.duration * 100) + "%";
+    }
+
+});
+
+progressBar.addEventListener("click", function (e) {
+
+    if (!audio.duration) {
+        return;
+    }
+
+    const rect =
+        progressBar.getBoundingClientRect();
+
+    audio.currentTime =
+        ((e.clientX - rect.left) / rect.width) *
+        audio.duration;
+});
+
+volumeSlider.addEventListener("input", function () {
+
+    audio.volume =
+        parseFloat(volumeSlider.value);
+
+});
+
+playPauseBtn.addEventListener("click", function () {
+
+    if (isPlaying) {
+        pauseTrack();
+    } else {
+        playTrack();
+    }
+
+});
+
+prevBtn.addEventListener("click", goPrev);
+
+nextBtn.addEventListener("click", function () {
+
+    goNext();
+
+    if (isPlaying) {
+        playTrack();
+    }
+
+});
+
+collapseBtn.addEventListener("click", function () {
+
+    playerFull.style.display = "none";
+    playerMini.style.display = "flex";
+
+});
+
+playerMini.addEventListener("click", function () {
+
+    playerMini.style.display = "none";
+    playerFull.style.display = "flex";
+
+});
+
+loadTrack(currentIndex);
+
+document.addEventListener(
+    "click",
+    function startOnInteraction() {
 
         playTrack();
 
-        document.removeEventListener("click", startOnInteraction);
-
-    }, { once: true });
+        document.removeEventListener(
+            "click",
+            startOnInteraction
+        );
+    },
+    { once: true }
+);
 
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════════
 
-     RADIUS: "Add Recently Played" feature (Apple Music via MusicKit JS)
-
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- Apple Music / MusicKit -->
 
 <script>
 
 (function () {
 
-    const BACKEND = "https://radius-backend-0qv8.onrender.com";
+    const BACKEND =
+        "https://radius-backend-0qv8.onrender.com";
 
-    const musicBtn         = document.getElementById("musicBtn");
+    const musicBtn =
+        document.getElementById("musicBtn");
 
-    const musicModal       = document.getElementById("musicModal");
+    const musicModal =
+        document.getElementById("musicModal");
 
-    const musicModalClose  = document.getElementById("musicModalClose");
+    const musicModalClose =
+        document.getElementById("musicModalClose");
 
-    const musicStep1       = document.getElementById("musicStep1");
+    const musicStep1 =
+        document.getElementById("musicStep1");
 
-    const musicStep2       = document.getElementById("musicStep2");
+    const musicStep2 =
+        document.getElementById("musicStep2");
 
-    const musicConnectBtn  = document.getElementById("musicConnectBtn");
+    const musicConnectBtn =
+        document.getElementById("musicConnectBtn");
 
-    const musicInsertBtn   = document.getElementById("musicInsertBtn");
+    const musicInsertBtn =
+        document.getElementById("musicInsertBtn");
 
-    const musicStatus      = document.getElementById("musicStatus");
+    const musicStatus =
+        document.getElementById("musicStatus");
 
     let musicKitInstance = null;
 
     let currentSnippet = null;
 
-    let musicKitReady = typeof MusicKit !== "undefined";
+    let musicKitReady =
+        typeof MusicKit !== "undefined";
 
-    // MusicKit on the Web loads asynchronously — the `MusicKit` global may
 
-    // not exist yet when this script runs. Listen for its ready event so
+    /*
+     * MusicKit loads asynchronously.
+     */
 
-    // we never touch it too early.
+    document.addEventListener(
+        "musickitloaded",
+        function () {
 
-    document.addEventListener("musickitloaded", () => { musicKitReady = true; });
+            console.log("MusicKit loaded.");
+
+            musicKitReady = true;
+        }
+    );
+
+
+    /*
+     * Wait for MusicKit to exist.
+     */
 
     function waitForMusicKit() {
 
-        if (musicKitReady) return Promise.resolve();
+        if (typeof MusicKit !== "undefined") {
 
-        return new Promise((resolve) => {
+            musicKitReady = true;
 
-            document.addEventListener("musickitloaded", () => resolve(), { once: true });
+            return Promise.resolve();
+        }
+
+        return new Promise(function (resolve, reject) {
+
+            const timeout =
+                setTimeout(function () {
+
+                    reject(
+                        new Error(
+                            "MusicKit failed to load."
+                        )
+                    );
+
+                }, 15000);
+
+
+            document.addEventListener(
+                "musickitloaded",
+                function () {
+
+                    clearTimeout(timeout);
+
+                    musicKitReady = true;
+
+                    resolve();
+
+                },
+                { once: true }
+            );
 
         });
-
     }
 
-    musicBtn.addEventListener("click", () => {
 
-        musicModal.classList.remove("hidden");
+    /*
+     * Open Apple Music modal.
+     */
 
-        checkExistingConnection();
+    musicBtn.addEventListener(
+        "click",
+        function () {
 
-    });
+            musicModal.classList.remove("hidden");
 
-    musicModalClose.addEventListener("click", () => musicModal.classList.add("hidden"));
+            checkExistingConnection();
+        }
+    );
 
-    function setStatus(msg) {
 
-        musicStatus.textContent = msg;
+    /*
+     * Close Apple Music modal.
+     */
+
+    musicModalClose.addEventListener(
+        "click",
+        function () {
+
+            musicModal.classList.add("hidden");
+        }
+    );
+
+
+    /*
+     * Display status message.
+     */
+
+    function setStatus(
+        message,
+        isError = false
+    ) {
+
+        musicStatus.textContent = message;
 
         musicStatus.classList.remove("hidden");
 
+        musicStatus.classList.remove(
+            "text-gray-400",
+            "text-red-400"
+        );
+
+        if (isError) {
+
+            musicStatus.classList.add(
+                "text-red-400"
+            );
+
+        } else {
+
+            musicStatus.classList.add(
+                "text-gray-400"
+            );
+        }
     }
 
-    // If already connected, skip straight to showing the current track.
+
+    /*
+     * Check whether this Radius account already has
+     * an Apple Music connection.
+     */
 
     async function checkExistingConnection() {
 
         try {
 
-            const res = await fetch(`${BACKEND}/api/music/${USER_ID}`);
+            const res = await fetch(
+                `${BACKEND}/api/music/${USER_ID}`,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
 
             if (res.ok) {
 
-                const body = await res.text();
+                const body =
+                    await res.text();
 
-                if (body && body !== "null") {
+                if (
+                    body &&
+                    body !== "null"
+                ) {
 
-                    showPreview(JSON.parse(body));
+                    const snippet =
+                        JSON.parse(body);
 
-                    return;
+                    if (snippet) {
 
+                        showPreview(snippet);
+
+                        return;
+                    }
                 }
-
             }
 
-        } catch (e) { /* not connected yet, fall through */ }
+        } catch (error) {
+
+            console.log(
+                "No existing Apple Music connection:",
+                error
+            );
+        }
 
         musicStep1.classList.remove("hidden");
 
         musicStep2.classList.add("hidden");
-
     }
+
+
+    /*
+     * Initialize MusicKit.
+     */
 
     async function initMusicKit() {
 
-        if (musicKitInstance) return musicKitInstance;
+        if (musicKitInstance) {
+            return musicKitInstance;
+        }
 
-        await waitForMusicKit(); // don't touch the MusicKit global until it's ready
 
-        const tokenRes = await fetch(`${BACKEND}/api/music/dev-token`);
+        await waitForMusicKit();
 
-        const { token } = await tokenRes.json();
+
+        if (typeof MusicKit === "undefined") {
+
+            throw new Error(
+                "MusicKit is not available."
+            );
+        }
+
+
+        console.log(
+            "Requesting developer token..."
+        );
+
+
+        const tokenRes = await fetch(
+            `${BACKEND}/api/music/dev-token`,
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+
+        if (!tokenRes.ok) {
+
+            throw new Error(
+                `Developer token request failed: HTTP ${tokenRes.status}`
+            );
+        }
+
+
+        const tokenData =
+            await tokenRes.json();
+
+
+        console.log(
+            "Developer token received:",
+            !!tokenData.token
+        );
+
+
+        if (!tokenData.token) {
+
+            throw new Error(
+                "Backend returned no developer token."
+            );
+        }
+
+
+        console.log(
+            "Configuring MusicKit..."
+        );
+
 
         await MusicKit.configure({
 
-            developerToken: token,
+            developerToken:
+                tokenData.token,
 
-            app: { name: "Radius", build: "1.0.0" }
+            app: {
+
+                name: "Radius",
+
+                build: "1.0.0"
+            }
 
         });
 
-        musicKitInstance = MusicKit.getInstance();
 
-        return musicKitInstance;
+        console.log(
+            "MusicKit configured."
+        );
 
-    }
 
-    musicConnectBtn.addEventListener("click", async () => {
+        musicKitInstance =
+            MusicKit.getInstance();
 
-        musicConnectBtn.disabled = true;
 
-        setStatus("Connecting...");
+        if (!musicKitInstance) {
 
-        try {
-
-            const music = await initMusicKit();
-
-            const userToken = await music.authorize(); // triggers Apple's sign-in popup
-
-            const res = await fetch(`${BACKEND}/api/music/connect/${USER_ID}`, {
-
-                method: "POST",
-
-                headers: { "Content-Type": "application/json" },
-
-                body: JSON.stringify({ appleMusicUserToken: userToken })
-
-            });
-
-            if (!res.ok) throw new Error("Backend connect failed");
-
-            const snippet = await res.json();
-
-            showPreview(snippet);
-
-            setStatus("");
-
-        } catch (err) {
-
-            console.error("APPLE MUSIC AUTH ERROR:", err);
-
-            console.error("name:", err?.name);
-
-            console.error("message:", err?.message);
-
-            console.error("code:", err?.code);
-
-            console.error("full error:", JSON.stringify(err, null, 2));
-
-            setStatus(
-
-                `Auth failed: ${err?.name || "unknown"} — ${err?.message || "unknown error"}`
-
+            throw new Error(
+                "MusicKit.getInstance() returned nothing."
             );
-
         }
 
-        musicConnectBtn.disabled = false;
 
-    });
+        console.log(
+            "MusicKit instance created."
+        );
+
+
+        return musicKitInstance;
+    }
+
+
+    /*
+     * Connect Apple Music.
+     */
+
+    musicConnectBtn.addEventListener(
+        "click",
+        async function () {
+
+            musicConnectBtn.disabled = true;
+
+            setStatus("Connecting...");
+
+
+            try {
+
+                console.log(
+                    "Starting Apple Music authorization..."
+                );
+
+
+                const music =
+                    await initMusicKit();
+
+
+                console.log(
+                    "MusicKit authorization status:",
+                    music.authorizationStatus
+                );
+
+
+                console.log(
+                    "Calling music.authorize()..."
+                );
+
+
+                const userToken =
+                    await music.authorize();
+
+
+                console.log(
+                    "Apple Music authorization succeeded."
+                );
+
+
+                if (!userToken) {
+
+                    throw new Error(
+                        "Apple Music returned an empty user token."
+                    );
+                }
+
+
+                console.log(
+                    "Apple Music user token received."
+                );
+
+
+                const res = await fetch(
+                    `${BACKEND}/api/music/connect/${USER_ID}`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            appleMusicUserToken:
+                                userToken
+                        })
+                    }
+                );
+
+
+                if (!res.ok) {
+
+                    const errorText =
+                        await res.text();
+
+                    throw new Error(
+                        `Backend connect failed: HTTP ${res.status} ${errorText}`
+                    );
+                }
+
+
+                const snippet =
+                    await res.json();
+
+
+                console.log(
+                    "Apple Music connection saved."
+                );
+
+
+                showPreview(snippet);
+
+                setStatus("");
+
+
+            } catch (error) {
+
+                console.error(
+                    "================================"
+                );
+
+                console.error(
+                    "APPLE MUSIC AUTH ERROR"
+                );
+
+                console.error(
+                    "================================"
+                );
+
+                console.error(
+                    "Error:",
+                    error
+                );
+
+                console.error(
+                    "Name:",
+                    error?.name
+                );
+
+                console.error(
+                    "Message:",
+                    error?.message
+                );
+
+                console.error(
+                    "Code:",
+                    error?.code
+                );
+
+                console.error(
+                    "Stack:",
+                    error?.stack
+                );
+
+
+                try {
+
+                    console.error(
+                        "Full error:",
+                        JSON.stringify(
+                            error,
+                            null,
+                            2
+                        )
+                    );
+
+                } catch (jsonError) {
+
+                    console.error(
+                        "Could not stringify error:",
+                        jsonError
+                    );
+                }
+
+
+                setStatus(
+                    `Auth failed: ${error?.name || "unknown"} — ${error?.message || "unknown error"}`,
+                    true
+                );
+
+            } finally {
+
+                musicConnectBtn.disabled = false;
+            }
+
+        }
+    );
+
+
+    /*
+     * Show the currently saved track.
+     */
 
     function showPreview(snippet) {
 
@@ -876,130 +1399,260 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
         musicStep2.classList.remove("hidden");
 
-        document.getElementById("musicPreviewArt").src = snippet.albumArtUrl || "";
 
-        document.getElementById("musicPreviewTrack").textContent = snippet.trackName || "No recent tracks yet";
+        document.getElementById(
+            "musicPreviewArt"
+        ).src =
+            snippet.albumArtUrl || "";
 
-        document.getElementById("musicPreviewArtist").textContent = snippet.artistName || "";
 
+        document.getElementById(
+            "musicPreviewTrack"
+        ).textContent =
+            snippet.trackName ||
+            "No recent tracks yet";
+
+
+        document.getElementById(
+            "musicPreviewArtist"
+        ).textContent =
+            snippet.artistName || "";
     }
 
-    // Inserts a small self-contained widget into the profile HTML that
 
-    // fetches + displays the CURRENT track live, every time the saved
+    /*
+     * Insert Recently Played widget into profile.
+     */
 
-    // profile page is loaded by anyone. IDs are namespaced with the user's
+    musicInsertBtn.addEventListener(
+        "click",
+        function () {
 
-    // ID so multiple widgets (or re-inserts) on the same page never collide.
+            const uid = USER_ID;
 
-    musicInsertBtn.addEventListener("click", () => {
 
-        const uid = USER_ID;
-
-        const widgetHtml = `
-
+            const widgetHtml = `
 <!-- Radius: Recently Played (auto-updates) -->
 
-<div id="radius-recently-played-${uid}" data-user-id="${uid}"
+<div
+    id="radius-recently-played-${uid}"
+    data-user-id="${uid}"
+    style="display:flex;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:10px 14px;max-width:320px;font-family:sans-serif;">
 
-     style="display:flex;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:10px 14px;max-width:320px;font-family:sans-serif;">
+    <img
+        id="rp-art-${uid}"
+        src=""
+        alt=""
+        style="width:44px;height:44px;border-radius:6px;object-fit:cover;background:#2d2d4e;">
 
-  <img id="rp-art-${uid}" src="" style="width:44px;height:44px;border-radius:6px;object-fit:cover;background:#2d2d4e;">
+    <div style="overflow:hidden;flex:1;">
 
-  <div style="overflow:hidden;flex:1;">
+        <div
+            id="rp-track-${uid}"
+            style="color:#e2e8f0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            Loading...
+        </div>
 
-    <div id="rp-track-${uid}" style="color:#e2e8f0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Loading...</div>
+        <div
+            id="rp-artist-${uid}"
+            style="color:#94a3b8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        </div>
 
-    <div id="rp-artist-${uid}" style="color:#94a3b8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    </div>
 
-  </div>
-
-  <button id="rp-play-${uid}" style="background:#4ade80;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:none;">▶</button>
+    <button
+        id="rp-play-${uid}"
+        style="background:#4ade80;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:none;">
+        ▶
+    </button>
 
 </div>
 
 <audio id="rp-audio-${uid}"></audio>
 
 <script>
-
 (function() {
 
-  fetch("${BACKEND}/api/music/${uid}")
+    fetch("${BACKEND}/api/music/${uid}")
 
-    .then(function(r) { return r.json(); })
+        .then(function(response) {
+            return response.json();
+        })
 
-    .then(function(data) {
+        .then(function(data) {
 
-      if (!data || !data.trackName) return;
+            if (!data || !data.trackName) {
+                return;
+            }
 
-      document.getElementById("rp-art-${uid}").src = data.albumArtUrl || "";
 
-      document.getElementById("rp-track-${uid}").textContent = data.trackName;
+            var art =
+                document.getElementById(
+                    "rp-art-${uid}"
+                );
 
-      document.getElementById("rp-artist-${uid}").textContent = data.artistName || "";
+            var track =
+                document.getElementById(
+                    "rp-track-${uid}"
+                );
 
-      if (data.previewUrl) {
+            var artist =
+                document.getElementById(
+                    "rp-artist-${uid}"
+                );
 
-        var btn = document.getElementById("rp-play-${uid}");
 
-        var audio = document.getElementById("rp-audio-${uid}");
+            if (art) {
+                art.src =
+                    data.albumArtUrl || "";
+            }
 
-        btn.style.display = "block";
 
-        var playing = false;
+            if (track) {
+                track.textContent =
+                    data.trackName;
+            }
 
-        btn.onclick = function() {
 
-          if (playing) { audio.pause(); btn.textContent = "▶"; }
+            if (artist) {
+                artist.textContent =
+                    data.artistName || "";
+            }
 
-          else { audio.src = data.previewUrl; audio.play(); btn.textContent = "❚❚"; }
 
-          playing = !playing;
+            if (data.previewUrl) {
 
-        };
+                var btn =
+                    document.getElementById(
+                        "rp-play-${uid}"
+                    );
 
-        audio.onended = function() { btn.textContent = "▶"; playing = false; };
+                var audio =
+                    document.getElementById(
+                        "rp-audio-${uid}"
+                    );
 
-      }
 
-    })
+                if (!btn || !audio) {
+                    return;
+                }
 
-    .catch(function() {});
+
+                btn.style.display =
+                    "block";
+
+
+                var playing = false;
+
+
+                btn.onclick = function() {
+
+                    if (playing) {
+
+                        audio.pause();
+
+                        btn.textContent =
+                            "▶";
+
+                        playing = false;
+
+                    } else {
+
+                        audio.src =
+                            data.previewUrl;
+
+                        audio.play()
+                            .then(function() {
+
+                                btn.textContent =
+                                    "❚❚";
+
+                                playing = true;
+
+                            })
+                            .catch(function(error) {
+
+                                console.error(
+                                    "Preview playback failed:",
+                                    error
+                                );
+
+                            });
+                    }
+                };
+
+
+                audio.onended =
+                    function() {
+
+                        btn.textContent =
+                            "▶";
+
+                        playing = false;
+                    };
+            }
+
+        })
+
+        .catch(function(error) {
+
+            console.error(
+                "Recently played widget error:",
+                error
+            );
+
+        });
 
 })();
-
 <\/script>
-
 `.trim();
 
-        // Insert at cursor — mirrors the existing image-insert behavior.
 
-        const cm = document.querySelector(".CodeMirror") && document.querySelector(".CodeMirror").CodeMirror;
+            /*
+             * CodeMirror was already initialized above.
+             * Use the existing editor instance directly.
+             */
 
-        if (cm) {
+            if (editor) {
 
-            cm.replaceSelection(widgetHtml);
+                editor.replaceSelection(
+                    widgetHtml
+                );
 
-        } else {
+            } else {
 
-            const editor = document.getElementById("editor");
+                const textarea =
+                    document.getElementById(
+                        "editor"
+                    );
 
-            const pos = editor.selectionStart;
+                const pos =
+                    textarea.selectionStart;
 
-            editor.value = editor.value.slice(0, pos) + widgetHtml + editor.value.slice(pos);
+                textarea.value =
+                    textarea.value.slice(
+                        0,
+                        pos
+                    ) +
+                    widgetHtml +
+                    textarea.value.slice(
+                        pos
+                    );
+            }
 
+
+            musicModal.classList.add(
+                "hidden"
+            );
         }
-
-        musicModal.classList.add("hidden");
-
-    });
+    );
 
 })();
 
 </script>
 
+
 <script src="js/editor.js"></script>
 
 </body>
-
 </html>
