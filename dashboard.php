@@ -469,10 +469,18 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
             const snippet = await res.json();
             showPreview(snippet);
             setStatus("");
-        } catch (err) {
-            console.error(err);
-            setStatus("Couldn't connect — try again.");
+        } } catch (err) {
+            console.error("APPLE MUSIC AUTH ERROR:", err);
+            console.error("name:", err?.name);
+            console.error("message:", err?.message);
+            console.error("code:", err?.code);
+            console.error("full error:", JSON.stringify(err, null, 2));
+
+            setStatus(
+                `Auth failed: ${err?.name || "unknown"} — ${err?.message || "unknown error"}`
+            );
         }
+
         musicConnectBtn.disabled = false;
     });
 
