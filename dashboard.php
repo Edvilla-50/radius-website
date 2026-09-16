@@ -562,9 +562,9 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
   function loadRecentlyPlayed() {
 
-        fetch("https://radius-create.com/music-proxy.php?id=${uid}&t=" + Date.now(), {
+        fetch("https://www.radius-create.com/music-proxy.php?id=" + uid + "&t=" + Date.now(), {
     cache: "no-store"
-    })
+    });
 
       .then(function(r) {
         if (!r.ok) throw new Error("HTTP " + r.status);
