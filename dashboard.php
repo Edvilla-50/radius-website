@@ -306,7 +306,10 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
                     class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
                 📷 Upload Image
             </button>
-
+            <button id="steamBtn"
+                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                🎮 Add Steam Games
+            </button>
             <button id="musicBtn"
                     class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
                 🎵 Add Recently Played
@@ -504,7 +507,46 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
     </div>
 
 </div>
+    <div id="steamModal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div class="bg-gray-800 rounded-xl p-6 w-80 shadow-2xl space-y-3">
 
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-semibold text-gray-200">Recent Steam Games</h2>
+                <button id="steamModalClose"
+                        class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+
+            <div id="steamStep1">
+                <p class="text-xs text-gray-400 mb-3">
+                    Paste your Steam profile link or ID. Your most recent games will be shown
+                    publicly on your Radius profile. Your Steam game details must be set to public.
+                </p>
+                <input id="steamInput" type="text"
+                    placeholder="steamcommunity.com/id/yourname"
+                    class="w-full bg-gray-900 text-gray-200 text-xs px-3 py-2 rounded-lg border border-gray-700 outline-none mb-3">
+                <button id="steamLinkBtn"
+                        class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40">
+                    Link Steam
+                </button>
+            </div>
+
+            <div id="steamStep2" class="hidden space-y-3">
+                <p class="text-xs text-gray-400">Linked. Your recent games:</p>
+                <div id="steamPreviewList" class="space-y-2"></div>
+                <button id="steamInsertBtn"
+                        class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
+                    Insert Steam widget at cursor
+                </button>
+                <button id="steamUnlinkBtn"
+                        class="w-full py-2 bg-red-600 hover:bg-red-500 text-sm font-semibold rounded-lg transition">
+                    Unlink Steam
+                </button>
+            </div>
+
+            <p id="steamStatus" class="text-xs text-gray-400 hidden"></p>
+        </div>
+    </div>
 <div id="music-player">
 
     <button id="collapseBtn"
@@ -1309,7 +1351,207 @@ document.addEventListener("click", function startOnInteraction() {
     });
 
 })();
+</script>
+<script>
+(function () {
 
+    const modal = document.getElementById("steamModal");
+    const step1 = document.getElementById("steamStep1");
+    const step2 = document.getElementById("steamStep2");
+    const input = document.getElementById("steamInput");
+    const linkBtn = document.getElementById("steamLinkBtn");
+    const unlinkBtn = document.getElementById("steamUnlinkBtn");
+    const insertBtn = document.getElementById("steamInsertBtn");
+    const list = document.getElementById("steamPreviewList");
+    const status = document.getElementById("steamStatus");
+
+    function setStatus(msg) {
+        status.textContent = msg;
+        status.classList.toggle("hidden", !msg);
+    }
+
+    function hours(minutes) {
+        return (Math.round(minutes / 6) / 10) + " hrs past 2 weeks";
+    }
+
+    function showGames(games) {
+        step1.classList.add("hidden");
+        step2.classList.remove("hidden");
+        list.innerHTML = "";
+
+        if (!games.length) {
+            const p = document.createElement("p");
+            p.className = "text-xs text-gray-500";
+            p.textContent = "No recent games found. Make sure your Steam game details are public.";
+            list.appendChild(p);
+            return;
+        }
+
+        games.forEach(function (g) {
+            const row = document.createElement("div");
+            row.className = "flex items-center gap-3 bg-gray-900 rounded-lg p-2";
+
+            const img = document.createElement("img");
+            img.src = "https://cdn.cloudflare.steamstatic.com/steam/apps/" + g.appid + "/header.jpg";
+            img.className = "w-16 h-8 rounded object-cover bg-gray-700";
+            img.onerror = function () { img.style.visibility = "hidden"; };
+
+            const info = document.createElement("div");
+            info.className = "overflow-hidden";
+
+            const name = document.createElement("div");
+            name.className = "text-sm font-medium text-gray-200 truncate";
+            name.textContent = g.name;
+
+            const time = document.createElement("div");
+            time.className = "text-xs text-gray-500";
+            time.textContent = hours(g.playtime_2weeks);
+
+            info.appendChild(name);
+            info.appendChild(time);
+            row.appendChild(img);
+            row.appendChild(info);
+            list.appendChild(row);
+        });
+    }
+
+    async function checkExisting() {
+        try {
+            const res = await fetch("steam-proxy.php?id=" + USER_ID, { cache: "no-store" });
+            if (res.ok) {
+                showGames(await res.json());
+                return;
+            }
+        } catch (e) {}
+        step1.classList.remove("hidden");
+        step2.classList.add("hidden");
+    }
+
+    document.getElementById("steamBtn").addEventListener("click", function () {
+        modal.classList.remove("hidden");
+        setStatus("");
+        checkExisting();
+    });
+
+    document.getElementById("steamModalClose").addEventListener("click", function () {
+        modal.classList.add("hidden");
+    });
+
+    linkBtn.addEventListener("click", async function () {
+        const value = input.value.trim();
+        if (!value) { setStatus("Paste your Steam profile link first."); return; }
+
+        linkBtn.disabled = true;
+        setStatus("Linking...");
+
+        try {
+            const res = await fetch("steam-link.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ input: value })
+            });
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || ("HTTP " + res.status));
+            showGames(JSON.parse(text));
+            setStatus("");
+        } catch (err) {
+            setStatus(err.message);
+        } finally {
+            linkBtn.disabled = false;
+        }
+    });
+
+    unlinkBtn.addEventListener("click", async function () {
+        if (!confirm("Unlink Steam from your Radius profile?")) return;
+
+        unlinkBtn.disabled = true;
+        try {
+            const res = await fetch("steam-link.php", { method: "DELETE" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            step2.classList.add("hidden");
+            step1.classList.remove("hidden");
+            input.value = "";
+            setStatus("Steam unlinked.");
+        } catch (err) {
+            setStatus("Unlink failed: " + err.message);
+        } finally {
+            unlinkBtn.disabled = false;
+        }
+    });
+
+    insertBtn.addEventListener("click", function () {
+
+        const uid = USER_ID;
+
+        const widgetHtml = `<!-- Radius: Recent Steam Games (auto-updates) -->
+<div id="radius-steam-${uid}"
+     style="background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:10px 14px;max-width:320px;font-family:sans-serif;">
+  <div style="color:#94a3b8;font-size:11px;letter-spacing:.05em;text-transform:uppercase;">Recently played on Steam</div>
+  <div id="rs-list-${uid}"></div>
+</div>
+
+<script>
+(function() {
+  var box = document.getElementById("radius-steam-${uid}");
+  var list = document.getElementById("rs-list-${uid}");
+
+  fetch("https://www.radius-create.com/steam-proxy.php?id=${uid}", { cache: "no-store" })
+    .then(function(r) {
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
+      return r.json();
+    })
+    .then(function(games) {
+      if (!games || !games.length) { box.style.display = "none"; return; }
+
+      games.forEach(function(g) {
+        var row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:10px;margin-top:8px;";
+
+        var img = document.createElement("img");
+        img.src = "https://cdn.cloudflare.steamstatic.com/steam/apps/" + g.appid + "/header.jpg";
+        img.style.cssText = "width:72px;height:34px;border-radius:4px;object-fit:cover;background:#2d2d4e;";
+        img.onerror = function() { img.style.visibility = "hidden"; };
+
+        var info = document.createElement("div");
+        info.style.cssText = "overflow:hidden;flex:1;";
+
+        var name = document.createElement("div");
+        name.textContent = g.name;
+        name.style.cssText = "color:#e2e8f0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+
+        var time = document.createElement("div");
+        time.textContent = (Math.round(g.playtime_2weeks / 6) / 10) + " hrs past 2 weeks";
+        time.style.cssText = "color:#94a3b8;font-size:12px;";
+
+        info.appendChild(name);
+        info.appendChild(time);
+        row.appendChild(img);
+        row.appendChild(info);
+        list.appendChild(row);
+      });
+    })
+    .catch(function(e) {
+      console.error("Steam widget failed:", e);
+      box.style.display = "none";
+    });
+})();
+<\/script>`.trim();
+
+        const cmElement = document.querySelector(".CodeMirror");
+        const cm = cmElement && cmElement.CodeMirror;
+
+        if (cm) {
+            cm.replaceSelection(widgetHtml);
+        } else {
+            const editor = document.getElementById("editor");
+            const pos = editor.selectionStart;
+            editor.value = editor.value.slice(0, pos) + widgetHtml + editor.value.slice(pos);
+        }
+
+        modal.classList.add("hidden");
+    });
+
+})();
 </script>
 
 <script src="js/editor.js"></script>
