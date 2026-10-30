@@ -8,7 +8,20 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method !== 'POST' && $method !== 'DELETE') { http_response_code(405); exit; }
 
 $backend = "https://radius-backend-0qv8.onrender.com";
-$secret = getenv('RADIUS_WRITE_KEY');   // or load from a config file outside the public web folder
+
+// 1) environment variable, 2) config file next to this one
+$secret = getenv('RADIUS_WRITE_KEY');
+$secretFile = __DIR__ . '/radius-secrets.php';
+if (!$secret && file_exists($secretFile)) {
+    $secret = require $secretFile;
+}
+$secret = trim((string)$secret);
+
+if ($secret === '') {
+    http_response_code(500);
+    echo "Server key not configured.";
+    exit;
+}
 
 $ch = curl_init("$backend/users/$userId/steam");
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
