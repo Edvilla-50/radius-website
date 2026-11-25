@@ -1,7 +1,7 @@
 
 <?php /* index.php */ ?>
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <!DOCTYPE html>
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <html lang="en">
 <head>
 <meta charset="UTF-8">

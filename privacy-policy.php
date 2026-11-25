@@ -2,6 +2,7 @@
 <?php // privacy-policy.php ?>
 <!DOCTYPE html>
 <html lang="en">
+<link rel="icon" type="image/jpeg" href="logo.jpg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
