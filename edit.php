@@ -1,4 +1,4 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+<link rel="icon" type="image/jpeg" href="/image/appstore.png.jpg">
 <?php
 $userId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($userId <= 0) {
