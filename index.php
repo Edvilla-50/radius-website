@@ -1,5 +1,6 @@
-<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
+
 <?php /* index.php */ ?>
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,6 +65,7 @@ a.secondary:hover { background: rgba(255,255,255,0.25); }
 <a href="support.php" class="secondary">Support</a>
 <a href="-and_conditions.php" class="secondary">Terms</a>
 <a href="privacy-policy.php" class="secondary">Privacy</a>
+<a href="suggestions.php" class="secondary">Interest Suggestions</a>
 </div>
 </div>
 </body>

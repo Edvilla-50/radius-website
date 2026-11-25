@@ -1,9 +1,9 @@
 <link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <?php
-$userId = $_GET['id'] ?? null;
-if (!$userId) {
+$userId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($userId <= 0) {
     http_response_code(400);
-    echo "Missing user id";
+    echo "Missing or invalid user id";
     exit;
 }
 
@@ -14,6 +14,7 @@ $data = json_decode($response, true);
 $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>";
 ?>
 <!DOCTYPE html>
+<link rel="icon" type="image/jpeg" href="/image/radius-image.jpg">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
