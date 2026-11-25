@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<link rel="icon" type="image/jpeg" href="logo.jpg">
+<link rel="icon" type="image/png" href="appstore.png">
 <html lang="en">
 <head>
 <meta charset="UTF-8">
