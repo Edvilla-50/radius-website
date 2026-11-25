@@ -1,7 +1,7 @@
 
 <?php /* index.php */ ?>
 <!DOCTYPE html>
-<link rel="icon" type="image/png" href="appstore.png">
+<link rel="icon" type="image/png" href="image/appstore.png">
 <html lang="en">
 <head>
 <meta charset="UTF-8">
