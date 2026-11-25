@@ -40,7 +40,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
     <meta charset="UTF-8">
 
-    <link rel="icon" type="image/png" href="image/appstore.png">
+    <link rel="icon" type="image/png" href="/image/appstore.png?v=2">
 
     <title>Radius Profile Builder</title>
 
