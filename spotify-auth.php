@@ -9,7 +9,7 @@ if (!isset($_SESSION['userId'])) {
 
 // The Client ID is public, so it is fine here. The Client Secret is NOT needed
 // in PHP at all: the Spring Boot backend does the token exchange.
-$clientId = "YOUR_SPOTIFY_CLIENT_ID";
+$clientId = "4b266678bb2e43cbb89be65214ce8091";
 
 // Must be IDENTICAL to the redirect URI in the Spotify dashboard and to
 // SPOTIFY_REDIRECT_URI on Render, and must be on the same host (www or not)
