@@ -307,7 +307,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
                 📷 Upload Image
             </button>
             <button id="steamBtn"
-                class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                    class="px-3 py-1 bg-blue-800 rounded hover:bg-blue-700 text-sm">
                 🎮 Add Steam Games
             </button>
             <button id="musicBtn"
