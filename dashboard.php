@@ -312,7 +312,11 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
             </button>
             <button id="musicBtn"
                     class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
-                🎵 Add Recently Played
+                🎵 Add Apple Music
+            </button>
+            <button id="spotifyBtn"
+                    class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                🎵 Add Spotify
             </button>
 
             <button id="saveBtn"
@@ -547,6 +551,58 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
             <p id="steamStatus" class="text-xs text-gray-400 hidden"></p>
         </div>
     </div>
+
+<div id="spotifyModal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+
+    <div class="bg-gray-800 rounded-xl p-6 w-80 shadow-2xl space-y-3">
+
+        <div class="flex justify-between items-center">
+            <h2 class="text-sm font-semibold text-gray-200">Spotify Recently Played</h2>
+            <button id="spotifyModalClose"
+                    class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+        </div>
+
+        <div id="spotifyStep1">
+            <p class="text-xs text-gray-400 mb-3">
+                Connect Spotify so your latest track shows up on your profile automatically.
+            </p>
+            <button id="spotifyConnectBtn"
+                    class="w-full py-2 bg-green-500 hover:bg-green-400 text-sm font-semibold rounded-lg transition disabled:opacity-40">
+                Connect Spotify
+            </button>
+        </div>
+
+        <div id="spotifyStep2" class="hidden space-y-3">
+            <p class="text-xs text-gray-400">Connected. Here's your latest track:</p>
+
+            <div class="flex items-center gap-3 bg-gray-900 rounded-lg p-3">
+                <img id="spotifyPreviewArt" src=""
+                     class="w-10 h-10 rounded object-cover bg-gray-700">
+                <div class="overflow-hidden">
+                    <div id="spotifyPreviewTrack"
+                         class="text-sm font-medium text-gray-200 truncate"></div>
+                    <div id="spotifyPreviewArtist"
+                         class="text-xs text-gray-500 truncate"></div>
+                </div>
+            </div>
+
+            <button id="spotifyInsertBtn"
+                    class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-sm font-semibold rounded-lg transition">
+                Insert Spotify widget at cursor
+            </button>
+
+            <button id="spotifyDisconnectBtn"
+                    class="w-full py-2 bg-red-600 hover:bg-red-500 text-sm font-semibold rounded-lg transition">
+                Disconnect Spotify
+            </button>
+        </div>
+
+        <p id="spotifyStatus" class="text-xs text-gray-400 hidden"></p>
+
+    </div>
+</div>
+
 <div id="music-player">
 
     <button id="collapseBtn"
@@ -1534,6 +1590,204 @@ document.addEventListener("click", function startOnInteraction() {
       console.error("Steam widget failed:", e);
       box.style.display = "none";
     });
+})();
+<\/script>`.trim();
+
+        const cmElement = document.querySelector(".CodeMirror");
+        const cm = cmElement && cmElement.CodeMirror;
+
+        if (cm) {
+            cm.replaceSelection(widgetHtml);
+        } else {
+            const editor = document.getElementById("editor");
+            const pos = editor.selectionStart;
+            editor.value = editor.value.slice(0, pos) + widgetHtml + editor.value.slice(pos);
+        }
+
+        modal.classList.add("hidden");
+    });
+
+})();
+</script>
+
+<script>
+(function () {
+
+    const openBtn = document.getElementById("spotifyBtn");
+    const modal = document.getElementById("spotifyModal");
+    const closeBtn = document.getElementById("spotifyModalClose");
+    const step1 = document.getElementById("spotifyStep1");
+    const step2 = document.getElementById("spotifyStep2");
+    const connectBtn = document.getElementById("spotifyConnectBtn");
+    const insertBtn = document.getElementById("spotifyInsertBtn");
+    const disconnectBtn = document.getElementById("spotifyDisconnectBtn");
+    const status = document.getElementById("spotifyStatus");
+
+    function setStatus(msg) {
+        status.textContent = msg;
+        status.classList.toggle("hidden", !msg);
+    }
+
+    function showPreview(t) {
+        step1.classList.add("hidden");
+        step2.classList.remove("hidden");
+
+        document.getElementById("spotifyPreviewArt").src = t.albumArtUrl || "";
+        document.getElementById("spotifyPreviewTrack").textContent =
+            t.trackName || "No recent tracks yet";
+        document.getElementById("spotifyPreviewArtist").textContent = t.artist || "";
+    }
+
+    async function checkExisting() {
+        try {
+            const res = await fetch("spotify-proxy.php?id=" + USER_ID, { cache: "no-store" });
+            if (res.status === 200) {
+                showPreview(await res.json());
+                return true;
+            }
+        } catch (e) {}
+
+        step1.classList.remove("hidden");
+        step2.classList.add("hidden");
+        return false;
+    }
+
+    openBtn.addEventListener("click", function () {
+        modal.classList.remove("hidden");
+        setStatus("");
+        checkExisting();
+    });
+
+    closeBtn.addEventListener("click", function () {
+        modal.classList.add("hidden");
+    });
+
+    // Login happens in a popup so the code in your editor is never lost.
+    connectBtn.addEventListener("click", function () {
+
+        const popup = window.open("spotify-auth.php", "spotifyAuth", "width=500,height=720");
+
+        if (!popup) {
+            setStatus("Popup blocked. Allow popups for this site and try again.");
+            return;
+        }
+
+        connectBtn.disabled = true;
+        setStatus("Waiting for Spotify...");
+
+        const timer = setInterval(async function () {
+            if (!popup.closed) return;
+
+            clearInterval(timer);
+
+            const ok = await checkExisting();
+            setStatus(ok ? "" : "Spotify was not connected.");
+            connectBtn.disabled = false;
+        }, 800);
+    });
+
+    disconnectBtn.addEventListener("click", async function () {
+
+        if (!confirm("Disconnect Spotify from your Radius profile?")) return;
+
+        disconnectBtn.disabled = true;
+        setStatus("Disconnecting Spotify...");
+
+        try {
+            const res = await fetch("spotify-link.php", { method: "DELETE" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+
+            step2.classList.add("hidden");
+            step1.classList.remove("hidden");
+            setStatus("Spotify disconnected.");
+        } catch (err) {
+            setStatus("Disconnect failed: " + (err && err.message ? err.message : "unknown error"));
+        } finally {
+            disconnectBtn.disabled = false;
+        }
+    });
+
+    insertBtn.addEventListener("click", function () {
+
+        const uid = USER_ID;
+
+        const widgetHtml = `<!-- Radius: Spotify Recently Played (auto-updates) -->
+<div id="radius-spotify-${uid}"
+     style="display:none;align-items:center;gap:10px;background:#1a1a2e;border:1px solid #2d2d4e;border-radius:12px;padding:10px 14px;max-width:320px;font-family:sans-serif;">
+
+  <img id="sp-art-${uid}" src=""
+       style="width:44px;height:44px;border-radius:6px;object-fit:cover;background:#2d2d4e;">
+
+  <div style="overflow:hidden;flex:1;">
+
+    <div id="sp-track-${uid}"
+         style="color:#e2e8f0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+    </div>
+
+    <div id="sp-artist-${uid}"
+         style="color:#94a3b8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+    </div>
+
+    <a id="sp-link-${uid}" href="#" target="_blank" rel="noopener"
+       style="color:#1db954;font-size:11px;text-decoration:none;">Open in Spotify</a>
+
+  </div>
+
+</div>
+
+<script>
+(function() {
+
+  var box = document.getElementById("radius-spotify-${uid}");
+
+  function load() {
+
+    fetch("https://www.radius-create.com/spotify-proxy.php?id=${uid}&t=" + Date.now(), {
+      cache: "no-store"
+    })
+    .then(function(r) {
+
+      if (r.status === 204) {
+        box.style.display = "none";
+        return null;
+      }
+
+      if (!r.ok) {
+        return null;
+      }
+
+      return r.json();
+
+    })
+    .then(function(d) {
+
+      if (!d || !d.trackName) {
+        return;
+      }
+
+      document.getElementById("sp-art-${uid}").src = d.albumArtUrl || "";
+      document.getElementById("sp-track-${uid}").textContent = d.trackName;
+      document.getElementById("sp-artist-${uid}").textContent = d.artist || "";
+
+      var link = document.getElementById("sp-link-${uid}");
+
+      if (d.trackUrl && d.trackUrl.indexOf("https://open.spotify.com/") === 0) {
+        link.href = d.trackUrl;
+      }
+
+      box.style.display = "flex";
+
+    })
+    .catch(function(error) {
+      console.error("Spotify widget refresh failed:", error);
+    });
+
+  }
+
+  load();
+
+  setInterval(load, 60000);
+
 })();
 <\/script>`.trim();
 
