@@ -321,7 +321,7 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
 
             <button id="saveBtn"
                     class="px-4 py-2 bg-green-500 rounded hover:bg-green-400 text-sm font-semibold">
-                Save
+                Save profile
             </button>
 
         </div>
