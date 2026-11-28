@@ -311,11 +311,11 @@ $currentHtml = $data["html"] ?? "<html><body><h1>New Profile</h1></body></html>"
                 🎮 Add Steam Games
             </button>
             <button id="musicBtn"
-                    class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                class="px-3 py-1 bg-pink-600 rounded hover:bg-pink-500 text-sm">
                 🎵 Add Apple Music
             </button>
             <button id="spotifyBtn"
-                    class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm">
+                class="px-3 py-1 bg-green-600 rounded hover:bg-green-500 text-sm">
                 🎵 Add Spotify
             </button>
 
